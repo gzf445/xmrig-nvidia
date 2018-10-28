@@ -101,7 +101,11 @@ CudaThread::CudaThread(const rapidjson::Value &object) :
     setBlocks(object["blocks"].GetInt());
     setBFactor(object["bfactor"].GetInt());
     setBSleep(object["bsleep"].GetInt());
-    setSyncMode(object["sync_mode"].GetUint());
+
+    const rapidjson::Value &syncMode = object["sync_mode"];
+    if (syncMode.IsUint()) {
+        setSyncMode(syncMode.GetUint());
+    }
 
     const rapidjson::Value &affinity = object["affine_to_cpu"];
     if (affinity.IsInt()) {
@@ -128,7 +132,7 @@ bool CudaThread::init(xmrig::Algo algorithm)
     ctx.device_bsleep  = m_bsleep;
     ctx.syncMode       = m_syncMode;
 
-    if (cuda_get_deviceinfo(&ctx, algorithm) != 0) {
+    if (cuda_get_deviceinfo(&ctx, algorithm, false) != 0) {
         return false;
     }
 
